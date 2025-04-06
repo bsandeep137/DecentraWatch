@@ -9,13 +9,13 @@ COPY package.json .
 COPY bun.lock .
 
 # Install dependencies
-RUN bun install 
+RUN bun install
 
-# Copy the rest of the application
-COPY . .
+# Copy the Validator application
+COPY apps/validator/ ./apps/validator/
 
-# Build the application (if needed)
-# RUN bun run build
+# Set working directory to Validator
+WORKDIR /app/apps/validator
 
 # Add environment variable support
 ENV NODE_ENV=production

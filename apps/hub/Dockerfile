@@ -9,14 +9,15 @@ COPY package.json .
 COPY bun.lock .
 
 # Install dependencies
-RUN bun install 
-# Copy the rest of the application
-COPY . .
+RUN bun install
 
-# Build the application (if needed)
-# RUN bun run build
+# Copy the Hub application
+COPY apps/hub/ ./apps/hub/
 
-# Expose the WebSocket port
+# Set working directory to Hub
+WORKDIR /app/apps/hub
+
+# Expose the port your Hub runs on
 EXPOSE 8081
 
 # Add environment variable support

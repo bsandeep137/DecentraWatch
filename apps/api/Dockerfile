@@ -11,14 +11,14 @@ COPY bun.lock .
 # Install dependencies
 RUN bun install
 
-# Copy the rest of the application
-COPY . .
+# Copy the API application
+COPY apps/api/ ./apps/api/
 
-# Build the application (if needed)
-# RUN bun run build
+# Set working directory to API
+WORKDIR /app/apps/api
 
 # Expose the port your API runs on
-EXPOSE 3001
+EXPOSE 3000
 
 # Add environment variable support
 ENV NODE_ENV=production
