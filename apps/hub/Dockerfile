@@ -4,11 +4,11 @@ FROM oven/bun:1 as base
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy root package files
 COPY package.json .
 COPY bun.lock .
 
-# Install dependencies
+# Install root dependencies
 RUN bun install
 
 # Copy the Hub application
@@ -16,6 +16,9 @@ COPY apps/hub/ ./apps/hub/
 
 # Set working directory to Hub
 WORKDIR /app/apps/hub
+
+# Install hub-specific dependencies
+RUN bun install
 
 # Expose the port your Hub runs on
 EXPOSE 8081

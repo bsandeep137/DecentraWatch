@@ -4,11 +4,11 @@ FROM oven/bun:1 as base
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy root package files
 COPY package.json .
 COPY bun.lock .
 
-# Install dependencies
+# Install root dependencies
 RUN bun install
 
 # Copy the Validator application
@@ -16,6 +16,9 @@ COPY apps/validator/ ./apps/validator/
 
 # Set working directory to Validator
 WORKDIR /app/apps/validator
+
+# Install validator-specific dependencies
+RUN bun install
 
 # Add environment variable support
 ENV NODE_ENV=production
