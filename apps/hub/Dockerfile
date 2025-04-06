@@ -17,6 +17,9 @@ COPY packages/ ./packages/
 # Set working directory to db package for Prisma
 WORKDIR /app/packages/db
 
+# Install Prisma CLI
+RUN bun add -D prisma
+
 # Generate Prisma client
 RUN bunx prisma generate
 
