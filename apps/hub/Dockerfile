@@ -14,17 +14,20 @@ RUN bun install
 # Copy packages directory
 COPY packages/ ./packages/
 
-# Copy the Hub application
-COPY apps/hub/ ./apps/hub/
-
-# Set working directory to Hub
-WORKDIR /app/apps/hub
-
-# Install hub-specific dependencies
-RUN bun install
+# Set working directory to db package for Prisma
+WORKDIR /app/packages/db
 
 # Generate Prisma client
 RUN bunx prisma generate
+
+# Set working directory back to Hub
+WORKDIR /app/apps/hub
+
+# Copy the Hub application
+COPY apps/hub/ ./apps/hub/
+
+# Install hub-specific dependencies
+RUN bun install
 
 # Expose the port your Hub runs on
 EXPOSE 8081

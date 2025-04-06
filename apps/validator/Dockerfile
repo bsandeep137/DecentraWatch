@@ -14,17 +14,20 @@ RUN bun install
 # Copy packages directory
 COPY packages/ ./packages/
 
-# Copy the Validator application
-COPY apps/validator/ ./apps/validator/
-
-# Set working directory to Validator
-WORKDIR /app/apps/validator
-
-# Install validator-specific dependencies
-RUN bun install
+# Set working directory to db package for Prisma
+WORKDIR /app/packages/db
 
 # Generate Prisma client
 RUN bunx prisma generate
+
+# Set working directory back to Validator
+WORKDIR /app/apps/validator
+
+# Copy the Validator application
+COPY apps/validator/ ./apps/validator/
+
+# Install validator-specific dependencies
+RUN bun install
 
 # Add environment variable support
 ENV NODE_ENV=production

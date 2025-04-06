@@ -14,17 +14,20 @@ RUN bun install
 # Copy packages directory
 COPY packages/ ./packages/
 
-# Copy the API application
-COPY apps/api/ ./apps/api/
-
-# Set working directory to API
-WORKDIR /app/apps/api
-
-# Install api-specific dependencies
-RUN bun install
+# Set working directory to db package for Prisma
+WORKDIR /app/packages/db
 
 # Generate Prisma client
 RUN bunx prisma generate
+
+# Set working directory back to API
+WORKDIR /app/apps/api
+
+# Copy the API application
+COPY apps/api/ ./apps/api/
+
+# Install api-specific dependencies
+RUN bun install
 
 # Expose the port your API runs on
 EXPOSE 3000
