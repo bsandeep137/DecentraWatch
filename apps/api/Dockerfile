@@ -18,7 +18,7 @@ COPY . .
 # RUN bun run build
 
 # Expose the port your API runs on
-EXPOSE 3000
+EXPOSE 3001
 
 # Add environment variable support
 ENV NODE_ENV=production
