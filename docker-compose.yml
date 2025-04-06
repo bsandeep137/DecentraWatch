@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      # Required: Your JWT secret key for authentication
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - decentrawatch-network
+
+  hub:
+    build:
+      context: .
+      dockerfile: apps/hub/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - NODE_ENV=production
+      # Optional: Reward amount per tick (default: 1)
+      - REWARD_PER_TICK=${REWARD_PER_TICK:-1}
+    networks:
+      - decentrawatch-network
+
+  validator:
+    build:
+      context: .
+      dockerfile: apps/validator/Dockerfile
+    environment:
+      - NODE_ENV=production
+      # Required: Your validator secret key
+      - VALIDATOR_SECRET_KEY=${VALIDATOR_SECRET_KEY}
+    networks:
+      - decentrawatch-network
+    depends_on:
+      - hub
+
+networks:
+  decentrawatch-network:
+    driver: bridge 
