@@ -11,6 +11,9 @@ COPY bun.lock .
 # Install root dependencies
 RUN bun install
 
+# Copy packages directory
+COPY packages/ ./packages/
+
 # Copy the Hub application
 COPY apps/hub/ ./apps/hub/
 
@@ -19,6 +22,9 @@ WORKDIR /app/apps/hub
 
 # Install hub-specific dependencies
 RUN bun install
+
+# Generate Prisma client
+RUN bunx prisma generate
 
 # Expose the port your Hub runs on
 EXPOSE 8081

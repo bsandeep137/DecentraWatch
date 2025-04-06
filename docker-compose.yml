@@ -1,6 +1,15 @@
 version: '3.8'
 
 services:
+ postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   api:
     build:
       context: .
@@ -40,6 +49,9 @@ services:
     depends_on:
       - hub
 
+
+volumes:
+  postgres_data:
 networks:
   decentrawatch-network:
     driver: bridge 

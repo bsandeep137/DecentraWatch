@@ -11,6 +11,9 @@ COPY bun.lock .
 # Install root dependencies
 RUN bun install
 
+# Copy packages directory
+COPY packages/ ./packages/
+
 # Copy the API application
 COPY apps/api/ ./apps/api/
 
@@ -19,6 +22,9 @@ WORKDIR /app/apps/api
 
 # Install api-specific dependencies
 RUN bun install
+
+# Generate Prisma client
+RUN bunx prisma generate
 
 # Expose the port your API runs on
 EXPOSE 3000
