@@ -15,11 +15,12 @@ async function main() {
     const secretKey = bs58.decode(process.env.VALIDATOR_SECRET_KEY);
     const keypair = Keypair.fromSecretKey(secretKey);
     console.log(keypair.secretKey.toBase64());
-    const ws = new WebSocket("ws://localhost:8081");
+    const ws = new WebSocket("ws://localhost:8082");
+    console.log("Connecting to hub", ws);
 
     ws.onmessage = async (event) => {
         const data = JSON.parse(event.data);
-        
+        console.log(data, "onmessage");
         if (data.type === "signup") {
             CALLBACKS[data.data.callbackId]?.(data.data)
             delete CALLBACKS[data.data.callbackId];
@@ -34,7 +35,7 @@ async function main() {
         CALLBACKS[callbackId] = (data: SignUpOutgoingRequest) => {
             validatorId = data.validatorId;
         }
-
+        console.log(callbackId, "onopen");
         const signedMessage = await signMessage(`Signed message for ${callbackId}, ${keypair.publicKey}`, keypair);
         // console.log(signedMessage);
 

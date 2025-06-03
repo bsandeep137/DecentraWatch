@@ -18,14 +18,14 @@ Bun.serve({
     },
     websocket: {
         open(ws: ServerWebSocket<unknown>) {
-
+            console.log("Connection opened");
             // const data: IncomingRequest = ws;
 
         },
         async message(ws: ServerWebSocket<unknown>, message: string) {
             const data: IncomingRequest = JSON.parse(message);
 
-            // console.log(data, "onmess");
+            console.log(data, "onmess");
             if (data.type === "signup") {
                 // console.log(data.data, "in signup");
                 const verified = await verifyMessage(`Signed message for ${data.data.callbackId}, ${data.data.publicKey}`, data.data.publicKey, data.data.signedMessage);
@@ -48,7 +48,7 @@ Bun.serve({
             console.log(`Connection closed with code ${code}: ${message}`);
         },
     },
-    port: 8081,
+    port: 8082,
 });
 
 function verifyMessage(message: string, publicKey: string, signedMessage: string) {
@@ -63,7 +63,7 @@ async function validatorSignUp(ws: ServerWebSocket<unknown>, data: SignUpIncomin
             publicKey: data.publicKey
         }
     });
-    // console.log(validatorDbEntry, "validatorDbEntry");
+    console.log(validatorDbEntry, "validatorDbEntry");
     let validatorId = "";
     if (!validatorDbEntry) {
         const validator = await prismaClient.validator.create({
@@ -85,7 +85,7 @@ async function validatorSignUp(ws: ServerWebSocket<unknown>, data: SignUpIncomin
         ws,
         publicKey: data.publicKey,
     });
-    // console.log(availableValidators, "availableValidators");
+    console.log(availableValidators, "availableValidators");
     ws.send(JSON.stringify({
         type: "signup",
         data: {

@@ -40,7 +40,7 @@ app.get("/api/v1/website/status", authMiddleware, async (req, res) => {
     res.status(200).json(data);
 })
 
-app.get("/api/v1/websites", authMiddleware, async (req, res) => {
+app.get("/api/v1/websites", async (req, res) => {
     const userId = req.userid;
 
     const websites = await prismaClient.webSite.findMany({
@@ -75,5 +75,5 @@ app.delete("/api/v1/website/:id", authMiddleware, async (req, res) => {
 })
 
 app.listen(3001, () => {
-    console.log("Server is running on port 3000");
+    console.log("Server is running on port 3001");
 });

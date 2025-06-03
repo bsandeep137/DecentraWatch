@@ -2,56 +2,65 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres
+    image: postgres:16
+    container_name: decentrawatch-db
     environment:
-      POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: mydatabase
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: decentrawatch
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - decentrawatch-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
   api:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
+    image: api
+    container_name: decentrawatch-api
+    environment:
+      DATABASE_URL: "postgres://postgres:password@decentrawatch-db:5432/decentrawatch?schema=public"
+      JWT_SECRET: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0vDKWF9jNmqZCFVO3LkigM6u5hzn60hNC1b1tq7QHpXBV7QZN1dWNRXUfKOfBI57hx0vHDGnbhqRz8QMUa6lIwFG6GF9q1AYrFk/cSQZCsqI4qMAPx/y8hRaRK5hmlRPNjwll1s0D3tlBkT/Ne82XtG+AxOXuHGtxQqkTTxvzVKboDr++GNFt9gj5x1mrMJeVSmcxf9YfVXsGTR21ByNr0vaPBcvlZZbZ7bj9GeUt1bFG5tuGA1UOuRVq/FB/pdhkiUH87DYwgcq5PsSBaa3enKXe0xIzHgoiWV2511VKWOJqIRqJB2q0+BAcYQ2H1hJrqlxmhqEGPBJu1yQ3ZxzAwIDAQAB\n-----END PUBLIC KEY-----"
     ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      # Required: Your JWT secret key for authentication
-      - JWT_SECRET=${JWT_SECRET}
-    networks:
-      - decentrawatch-network
-
-  hub:
-    build:
-      context: .
-      dockerfile: apps/hub/Dockerfile
-    ports:
-      - "8081:8081"
-    environment:
-      - NODE_ENV=production
-      # Optional: Reward amount per tick (default: 1)
-      - REWARD_PER_TICK=${REWARD_PER_TICK:-1}
-    networks:
-      - decentrawatch-network
-
-  validator:
-    build:
-      context: .
-      dockerfile: apps/validator/Dockerfile
-    environment:
-      - NODE_ENV=production
-      # Required: Your validator secret key
-      - VALIDATOR_SECRET_KEY=${VALIDATOR_SECRET_KEY}
+      - "3001:3001"
     networks:
       - decentrawatch-network
     depends_on:
-      - hub
+      postgres:
+        condition: service_healthy
 
+  hub:
+    image: hub
+    container_name: decentrawatch-hub
+    environment:
+      DATABASE_URL: "postgres://postgres:password@decentrawatch-db:5432/decentrawatch?schema=public"
+    ports:
+      - "8082:8082"
+    networks:
+      - decentrawatch-network
+
+  frontend:
+    image: frontend
+    container_name: decentrawatch-frontend
+    environment:
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_c2VsZWN0LWhlcm1pdC04NS5jbGVyay5hY2NvdW50cy5kZXYk
+      CLERK_SECRET_KEY: sk_test_i4m2t0blgl22EMMcV2wrRMsH2jHkU4dq4L1q6yf7EI
+    ports:
+      - "3000:3000"
+    networks:
+      - decentrawatch-network
+    
+  
 
 volumes:
   postgres_data:
+
 networks:
   decentrawatch-network:
     driver: bridge 

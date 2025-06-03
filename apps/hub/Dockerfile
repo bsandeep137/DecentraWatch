@@ -1,43 +1,35 @@
-# Use the official Bun image
-FROM oven/bun:1 as base
+FROM oven/bun:1 AS base
 
-# Set working directory
 WORKDIR /app
 
-# Copy root package files
-COPY package.json .
-COPY bun.lock .
+# Install OpenSSL
+RUN apt-get update -y && apt-get install -y openssl
 
-# Install root dependencies
+# Copy package files
+COPY package*.json ./
+COPY bun.lock ./
+COPY turbo.json ./
+
+# Install dependencies
 RUN bun install
 
-# Copy packages directory
-COPY packages/ ./packages/
-
-# Set working directory to db package for Prisma
-WORKDIR /app/packages/db
-
-# Install Prisma CLI
-RUN bun add -D prisma
-
-# Generate Prisma client
-RUN bunx prisma generate
-
-# Set working directory back to Hub
-WORKDIR /app/apps/hub
-
-# Copy the Hub application
+# Copy the rest of the application
 COPY apps/hub/ ./apps/hub/
+COPY packages/db/ ./packages/db/
+COPY packages/common/ ./packages/common/
 
-# Install hub-specific dependencies
-RUN bun install
+# Set environment variable
+# ENV DATABASE_URL="postgres://postgres:password@postgres:5432/postgres?schema=public"
 
-# Expose the port your Hub runs on
-EXPOSE 8081
+# Build the application and generate Prisma client
+RUN cd packages/db  && bun add -d prisma && DATABASE_URL=${DATABASE_URL} bunx prisma generate
+RUN cd apps/hub && bun install &&bun run build 
 
-# Add environment variable support
-ENV NODE_ENV=production
-ENV REWARD_PER_TICK=1
+
+RUN echo '#!/bin/sh\ncd /app/packages/db && DATABASE_URL=${DATABASE_URL} bunx prisma migrate deploy && cd /app/apps/hub && bun run start' > /app/start.sh
+RUN chmod +x /app/start.sh
+# Expose the port
+EXPOSE 8082
 
 # Start the application
-CMD ["bun", "index.ts"] 
+CMD ["/app/start.sh"]
